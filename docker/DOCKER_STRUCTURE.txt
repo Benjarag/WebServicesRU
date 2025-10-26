@@ -1,0 +1,54 @@
+DOCKER folder structure (short)
+
+docker/
+├─ docker.sln                         # Solution file for multi-project Docker workspace
+├─ dotnet/
+│  ├─ dotnet.sln
+│  ├─ pokemon-stack/
+│  │  ├─ docker-compose.yml           # Compose for .NET services + DB
+│  │  ├─ init-scripts/                # DB init (migrations, seed SQL)
+│  │  │  ├─ 01-migration-script.sql
+│  │  │  └─ 02-seed.sql
+│  │  ├─ pokemon-api/
+│  │  │  ├─ Dockerfile                # Builds the .NET API image
+│  │  │  ├─ pokemon-api.csproj
+│  │  │  ├─ Program.cs                # App entry point
+│  │  │  ├─ appsettings*.json         # Configuration per environment
+│  │  │  └─ Migrations/                # EF Core migrations
+│  │  └─ pokemon-image-api/           # .NET image-serving service
+│  │     ├─ Dockerfile
+│  │     └─ sprites/                  # image assets
+│  └─ Quote.API/
+│     ├─ Dockerfile
+│     ├─ Quote.API.csproj
+│     └─ Controllers/                 # API controllers
+└─ node-js/
+   ├─ docker-compose.yml             # Compose for Node.js services
+   ├─ pokemon-api/                    # Node-based API
+   │  ├─ Dockerfile
+   │  ├─ index.js                     # App entry point
+   │  ├─ package.json
+   │  └─ config/                      # env-specific configs (db, ws)
+   ├─ pokemon-image-api/              # .NET project for images (in Node tree)
+   │  ├─ Dockerfile
+   │  └─ sprites/                     # many png files
+   └─ quote-api/
+      ├─ Dockerfile
+      ├─ index.js
+      └─ package.json
+
+Important things for an AI to inspect first:
+- Top-level `docker-compose.yml` files (or `pokemon-stack/docker-compose.yml`) — define services, networks, volumes, build context, and envs.
+- Each service's `Dockerfile` — build steps, base image, ports, copy context.
+- `init-scripts/` (DB migration + seed) — DB initialization order and SQL run scripts.
+- `.csproj`, `Program.cs`, and `Migrations/` (for .NET services) — runtime/framework, EF Core migrations.
+- `package.json` and `index.js` (for Node services) — dependencies, start scripts, env usage.
+- `appsettings*.json` — configuration per environment used by .NET services.
+- `sprites/` — large static assets that may be mounted or copied into images.
+
+Quick notes:
+- Look for volume mounts and named volumes in compose files (persistent DB data, asset sharing).
+- Check environment variables and secrets passed in compose or Dockerfiles.
+- Order of service startup often requires DB init scripts to run before API migrations.
+
+Files to include when asking deeper questions: `docker-compose.yml`, each service `Dockerfile`, `init-scripts/*`, `appsettings.json`/`appsettings.Development.json`, `package.json`, `Program.cs`.
